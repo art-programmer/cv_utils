@@ -293,7 +293,7 @@ namespace
 	for (vector<int>::const_iterator pixel_it = target_pixels.begin(); pixel_it != target_pixels.end(); pixel_it++) {
 	  if (source_mask.at(*pixel_it) == true)
             continue;
-          vector<int> window_pixels = target_mask.calcWindowPixels(*pixel_it, WINDOW_SIZE);
+          vector<int> window_pixels = target_mask.findMaskWindowPixels(*pixel_it, WINDOW_SIZE);
           // window_pixels.clear();
           // window_pixels.push_back(*pixel_it);
           vector<Vec3b> color_values;
@@ -335,7 +335,7 @@ namespace
           }
           stringstream nearest_neighbor_image_filename;
           nearest_neighbor_image_filename << "Test/nearest_neighbor_image_" << index << ".bmp";
-          imwrite(nearest_neighbor_image_filename.str(), nearest_neighbor_image);
+          //imwrite(nearest_neighbor_image_filename.str(), nearest_neighbor_image);
           index++;
         }
       } else {
@@ -346,7 +346,7 @@ namespace
           if (lower_level_target_mask.at(lower_level_pixel) == false || lower_level_source_mask.at(lower_level_pixel) == true)
             continue;
 	  
-          vector<int> window_pixels = target_mask.calcWindowPixels(convertPixel(lower_level_pixel, LOWER_LEVEL_IMAGE_WIDTH, LOWER_LEVEL_IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT), WINDOW_SIZE);
+          vector<int> window_pixels = target_mask.findMaskWindowPixels(convertPixel(lower_level_pixel, LOWER_LEVEL_IMAGE_WIDTH, LOWER_LEVEL_IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT), WINDOW_SIZE);
           //        window_pixels.clear();
           //        window_pixels.push_back(pixel);
           vector<Vec3b> color_values;
@@ -383,11 +383,11 @@ namespace
       }
     }
     
-    if (source_image.cols == 125) {
-      imwrite("Test/image_with_source_mask.bmp", source_mask.drawImageWithMask(target_image));
-      imwrite("Test/target_image.bmp", current_target_image);
-      //exit(1);
-    }
+    // if (source_image.cols == 125) {
+    //   imwrite("Test/image_with_source_mask.bmp", source_mask.drawImageWithMask(target_image));
+    //   imwrite("Test/target_image.bmp", current_target_image);
+    //   //exit(1);
+    // }
     
     resize(current_target_image, current_target_image, Size(lower_level_source_image.cols, lower_level_source_image.rows));
     
@@ -449,13 +449,13 @@ namespace
           unwarped_target_mask_image.at<uchar>(unwarped_y - min_y, unwarped_x - min_x) = 255;
       }
     }
-    imwrite("Test/unwarped_image.bmp", unwarped_image);
+    //imwrite("Test/unwarped_image.bmp", unwarped_image);
     //    exit(1);
     ImageMask unwarped_source_mask(unwarped_source_mask_image);
     ImageMask unwarped_target_mask(unwarped_target_mask_image);
     
-    imwrite("Test/unwarped_source_mask_image.bmp", unwarped_source_mask.drawMaskImage());
-    imwrite("Test/unwarped_target_mask_image.bmp", unwarped_target_mask.drawMaskImage());
+    //imwrite("Test/unwarped_source_mask_image.bmp", unwarped_source_mask.drawMaskImage());
+    //imwrite("Test/unwarped_target_mask_image.bmp", unwarped_target_mask.drawMaskImage());
     
     
     int num_source_pixels = unwarped_source_mask.getNumPixels();
@@ -467,6 +467,12 @@ namespace
     
     Mat image_for_completion = unwarped_image.clone();
     cvtColor(image_for_completion, image_for_completion, CV_BGR2Lab);
+    for (int pixel = 0; pixel < unwarped_image.cols * unwarped_image.rows; pixel++) {
+      Vec3b color = image_for_completion.at<Vec3b>(pixel / unwarped_image.cols, pixel % unwarped_image.cols);
+      color[0] = round(color[0] * 1.0 / 3);
+      image_for_completion.at<Vec3b>(pixel / unwarped_image.cols, pixel % unwarped_image.cols) = color;
+    }
+
     
     
     vector<Mat> image_pyramid;
@@ -560,7 +566,7 @@ namespace
       
       stringstream target_image_filename;
       target_image_filename << "Test/target_image_" << level << ".bmp";
-      imwrite(target_image_filename.str(), new_target_image);
+      //imwrite(target_image_filename.str(), new_target_image);
       
       target_image = new_target_image.clone();
     }
@@ -569,6 +575,11 @@ namespace
     //GaussianBlur(target_image, target_image, Size(5, 5), 0, 0);
     
     Mat image_completed = target_image.clone();
+    for (int pixel = 0; pixel < unwarped_image.cols * unwarped_image.rows; pixel++) {
+      Vec3b color = image_completed.at<Vec3b>(pixel / unwarped_image.cols, pixel % unwarped_image.cols);
+      color[0] = min(round(color[0] * 3), 255.0);
+      image_completed.at<Vec3b>(pixel / unwarped_image.cols, pixel % unwarped_image.cols) = color;
+    }
     cvtColor(image_completed, image_completed, CV_Lab2BGR);
     
     //imwrite("Test/image_completed.bmp", image_completed);

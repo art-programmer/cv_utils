@@ -32,10 +32,11 @@ namespace cv_utils
 
   //fast computation box integration
   std::vector<double> calcBoxIntegrationMask(const std::vector<double> &values, const int IMAGE_WIDTH, const int IMAGE_HEIGHT);
-  double calcBoxIntegration(const std::vector<double> &mask, const int IMAGE_WIDTH, const int IMAGE_HEIGHT, const int pixel_1, const int pixel_2);
-
+  double calcBoxIntegration(const std::vector<double> &mask, const int IMAGE_WIDTH, const int IMAGE_HEIGHT, const int x_1, const int y_1, const int x_2, const int y_2);
+  
   //calculate means and vars for all windows
   void calcWindowMeansAndVars(const std::vector<double> &values, const int IMAGE_WIDTH, const int IMAGE_HEIGHT, const int WINDOW_SIZE, std::vector<double> &means, std::vector<double> &vars);
+  void calcWindowMeansAndVars(const std::vector<std::vector<double> > &values, const int IMAGE_WIDTH, const int IMAGE_HEIGHT, const int WINDOW_SIZE, std::vector<std::vector<double> > &means, std::vector<std::vector<double> > &vars);
   
   //guided image filtering
   void guidedFilter(const cv::Mat &guidance_image, const cv::Mat &input_image, cv::Mat &output_image, const double radius, const double epsilon);
@@ -57,6 +58,9 @@ namespace cv_utils
   
   //find neighbors for all pixels
   std::vector<std::vector<int> > findNeighborsForAllPixels(const int WIDTH, const int HEIGHT, const int NEIGHBOR_SYSTEM = 8);
+
+  //find pixels in a neighboring window
+  std::vector<int> findWindowPixels(const int pixel, const int WIDTH, const int HEIGHT, const int WINDOW_SIZE, const bool USE_PANORAMA = false);
   
   inline double calcColorDiff(const cv::Mat &image, const int &pixel_1, const int &pixel_2)
   {
@@ -213,7 +217,8 @@ namespace cv_utils
       sum += pow(vec[c], 2);
     return sqrt(sum);
   }
-  
+
+  //calculate the distance from a point to a plane
   inline double calcPointPlaneDistance(const std::vector<double> &point, const std::vector<double> &plane)
   {
     double distance = plane[3];
@@ -221,7 +226,8 @@ namespace cv_utils
       distance -= plane[c] * point[c];
     return distance;
   }
-  
+
+  //calculate the euclidean distance between two vectors
   inline double calcDistance(const std::vector<double> &vec_1, const std::vector<double> &vec_2)
   {
     assert(vec_1.size() == vec_2.size());
@@ -230,7 +236,8 @@ namespace cv_utils
       distance += pow(vec_1[c] - vec_2[c], 2);
     return sqrt(distance);
   }
-  
+
+  //calculate the angle between two vectors
   inline double calcAngle(const std::vector<double> &vec_1, const std::vector<double> &vec_2)
   {
     assert(vec_1.size() == vec_2.size());
@@ -239,7 +246,9 @@ namespace cv_utils
       cos_value += vec_1[c] * vec_2[c];
     return acos(std::max(std::min(cos_value, 1.0), -1.0));
   }
-  
+
+  //fit a 2D line
+  std::vector<double> fitLine2D(const std::vector<double> &points);
   
   /**********Point Cloud Operations**********/
 

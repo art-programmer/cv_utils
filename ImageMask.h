@@ -45,8 +45,6 @@ namespace cv_utils
     
     void calcBoundaryDistanceMap(std::vector<int> &boundary_map, std::vector<double> &distance_map, const bool USE_PANORAMA = false, const int NEIGHBOR_SYSTEM = 8) const;
     
-    std::vector<int> calcWindowPixels(const int pixel, const int WINDOW_SIZE, const bool USE_PANORAMA = false) const;
-    
     std::vector<std::vector<int> > findConnectedComponents(const bool USE_PANORAMA = false, const int NEIGHBOR_SYSTEM = 8);
     
     void printMask();
@@ -60,6 +58,8 @@ namespace cv_utils
     friend ImageMask operator -(const ImageMask &image_mask_1, const ImageMask &image_mask_2);
     friend std::ostream & operator <<(std::ostream &out_str, const ImageMask &image_mask);
     friend std::istream & operator >>(std::istream &in_str, ImageMask &image_mask);
+
+    std::vector<int> findMaskWindowPixels(const int pixel, const int WINDOW_SIZE, const int USE_PANORAMA = false) const;
     
   private:
     std::vector<bool> mask_;

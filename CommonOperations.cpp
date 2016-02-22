@@ -56,4 +56,21 @@ namespace cv_utils
       pixel_neighbors[pixel] = findNeighbors(pixel, WIDTH, HEIGHT, NEIGHBOR_SYSTEM);
     return pixel_neighbors;
   }
+
+  std::vector<int> findWindowPixels(const int pixel, const int WIDTH, const int HEIGHT, const int WINDOW_SIZE, const bool USE_PANORAMA)
+  {
+    vector<int> window_pixels;
+    int x = pixel % WIDTH;
+    int y = pixel / WIDTH;
+    for (int offset_x = -(WINDOW_SIZE - 1) / 2; offset_x <= (WINDOW_SIZE - 1) / 2; offset_x++) {
+      for (int offset_y = -(WINDOW_SIZE - 1) / 2; offset_y <= (WINDOW_SIZE - 1) / 2; offset_y++) {
+        if (x + offset_x >= 0 && x + offset_x < WIDTH && y + offset_y >= 0 && y + offset_y < HEIGHT)
+          window_pixels.push_back((y + offset_y) * WIDTH + (x + offset_x));
+        if (USE_PANORAMA && (x + offset_x < 0 || x + offset_x >= WIDTH) && (y + offset_y >= 0 && y + offset_y < HEIGHT))
+          window_pixels.push_back((y + offset_y) * WIDTH + (x + offset_x + WIDTH) % WIDTH);
+      }
+    }
+    return window_pixels;
+  }
+  
 }

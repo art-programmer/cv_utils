@@ -324,22 +324,6 @@ namespace cv_utils
     }
   }
   
-  std::vector<int> ImageMask::calcWindowPixels(const int pixel, const int WINDOW_SIZE, const bool USE_PANORAMA) const
-  {
-    vector<int> window_pixels;
-    int x = pixel % width_;
-    int y = pixel / width_;
-    for (int offset_x = -(WINDOW_SIZE - 1) / 2; offset_x <= (WINDOW_SIZE - 1) / 2; offset_x++) {
-      for (int offset_y = -(WINDOW_SIZE - 1) / 2; offset_y <= (WINDOW_SIZE - 1) / 2; offset_y++) {
-        if (x + offset_x >= 0 && x + offset_x < width_ && y + offset_y >= 0 && y + offset_y < height_)
-	  window_pixels.push_back((y + offset_y) * width_ + (x + offset_x));
-        if (USE_PANORAMA && (x + offset_x < 0 || x + offset_x >= width_) && (y + offset_y >= 0 && y + offset_y < height_))
-	  window_pixels.push_back((y + offset_y) * width_ + (x + offset_x + width_) % width_);
-      }
-    }
-    return window_pixels;
-  }
-  
   std::vector<std::vector<int> > ImageMask::findConnectedComponents(const bool USE_PANORAMA, const int NEIGHBOR_SYSTEM)
   {
     vector<bool> visited_pixel_mask(width_ * height_, false);
@@ -466,5 +450,16 @@ namespace cv_utils
     for (int pixel = 0; pixel < width_ * height_; pixel++)
       mask_[pixel] = mask_image_gray.at<uchar>(pixel / width_, pixel % width_) >= 128;
   }
+
+  std::vector<int> ImageMask::findMaskWindowPixels(const int pixel, const int WINDOW_SIZE, const int USE_PANORAMA) const
+  {
+    vector<int> window_pixels = findWindowPixels(pixel, width_, height_, WINDOW_SIZE, USE_PANORAMA);
+    vector<int> mask_window_pixels;
+    for (vector<int>::const_iterator window_pixel_it = window_pixels.begin(); window_pixel_it != window_pixels.end(); window_pixel_it++)
+      if (mask_[*window_pixel_it])
+	mask_window_pixels.push_back(*window_pixel_it);
+    return mask_window_pixels;
+  }
+  
 }
 
